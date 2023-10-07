@@ -119,7 +119,7 @@ const validWallets = walletsList.split('\n');
 
 const tokenStorage = [];
 
-provider.on("block", (blockNumber) => {
+provider.on("block", async (blockNumber) => {
     const todayDate = new Date().toJSON().slice(0, 10);
     const todayAddressesPath = `./${todayDate}-addresses.txt`;
     if(!fs.existsSync(todayAddressesPath)) {
@@ -129,24 +129,52 @@ provider.on("block", (blockNumber) => {
     }
     const todayWalletsList = fs.readFileSync(todayAddressesPath, 'utf8');
     const todayWallets = todayWalletsList.split('\n');
-    provider.getBlockWithTransactions(blockNumber).then(tx => {
+    await provider.getBlockWithTransactions(blockNumber).then(async (tx) => {
         if (tx) {
             const blockTokens = [];
             let reviewCounter = 0;
             console.time(`Review for block #: ${blockNumber}`);
-            const promises = tx.transactions.map(element => {
-                const { data, from, hash, to, value} = element;
+            const addresses = [];
+            tx.transactions.forEach(element => {
+                const { data, from, to, value} = element;
                 const txValue = ethers.BigNumber.from(value);
                 if (data === '0x' && parseFloat(txValue.toString()) > 0.01 && exchangeAddresses.indexOf(from) !== -1) {//a9059cbb
                     //console.log(data)
-                    checkContractTransactions(to)
-                        .then(length => {
-                            if (length <= 1) {
-                                 fs.appendFileSync(todayAddressesPath, to+'\n')
-                                 console.log(to, length, parseFloat(txValue.toString()));
-                            }
-                        })
+                    addresses.push(to);
                 }
+            });
+            
+            const delayBetweenRequests = 2000; // 2 seconds delay
+            
+            for (const address of addresses) {
+                console.log(addresses.length);
+                try {
+                    const length = await checkContractTransactions(address);
+                    if (length <= 1) {
+                        fs.appendFileSync(todayAddressesPath, address+'\n');
+                    }
+                    await new Promise(resolve => setTimeout(resolve, delayBetweenRequests));
+                } catch (error) {
+                    console.error(`Error fetching data from ${address}:`, error);
+                }
+            
+                // Add a delay before the next fetch
+            }
+
+
+            const promises = tx.transactions.map(element => {
+                const { data, from, hash} = element;
+                // const txValue = ethers.BigNumber.from(value);
+                // if (data === '0x' && parseFloat(txValue.toString()) > 0.01 && exchangeAddresses.indexOf(from) !== -1) {//a9059cbb
+                //     //console.log(data)
+                //     checkContractTransactions(to)
+                //         .then(length => {
+                //             if (length <= 1) {
+                //                  fs.appendFileSync(todayAddressesPath, to+'\n')
+                //                 //  console.log(to, length, parseFloat(txValue.toString()));
+                //             }
+                //         })
+                // }
                 const isValid = validEvents.some(e => data.includes(e))
                     && (validWallets.some(w => w === from) || todayWallets.some(w => w === from));
                 const event = data.slice(0, 9);

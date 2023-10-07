@@ -47,6 +47,7 @@ const checkContractTransactions = async (address) => {
 
     const response = await fetch(`${etherscan_url}?${params}`);
     const {status, result} = await response.json();
+    console.log(`${etherscan_url}?${params}`, result.length, typeof result === 'string' ? result : '');
     if (status === '1') {
         return result.length;
     }
