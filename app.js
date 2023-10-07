@@ -135,12 +135,15 @@ provider.on("block", (blockNumber) => {
             let reviewCounter = 0;
             console.time(`Review for block #: ${blockNumber}`);
             const promises = tx.transactions.map(element => {
-                const { data, from, hash, to } = element;
-                if (data.includes('0xa9059cbb') && exchangeAddresses.indexOf(from) !== -1) {
+                const { data, from, hash, to, value} = element;
+                const txValue = ethers.BigNumber.from(value);
+                if (data === '0x' && parseFloat(txValue.toString()) > 0.01 && exchangeAddresses.indexOf(from) !== -1) {//a9059cbb
+                    //console.log(data)
                     checkContractTransactions(to)
                         .then(length => {
-                            if (length <= 2) {
-                                fs.appendFileSync(todayAddressesPath, to);
+                            if (length <= 1) {
+                                 fs.appendFileSync(todayAddressesPath, to+'\n')
+                                 console.log(to, length, parseFloat(txValue.toString()));
                             }
                         })
                 }
