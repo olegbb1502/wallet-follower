@@ -256,7 +256,9 @@ const buyTokenHandler = async (hash, from, buyedTokens) => {
         // THIS CODE FOR FUTURE DON`T TUCH
         // const checkWords = await checkContractForWords(address, 'rebase');
         // THIS CODE FOR FUTURE DON`T TUCH
-        if (buyedTokens.indexOf(address) === -1) {
+
+        const length = await checkContractTransactions(address);
+        if (buyedTokens.indexOf(address) === -1 && length <= 3) {
             // THIS CODE FOR FUTURE DON`T TUCH
             // const  proccessTokenHandler  = await proccessToken(address);
             // console.log(proccessTokenHandler);
