@@ -137,18 +137,20 @@ provider.on("block", async (blockNumber) => {
             console.time(`Review for block #: ${blockNumber}`);
             const addresses = [];
             tx.transactions.forEach(element => {
-                const { data, from, to, value} = element;
+                const { data,hash, from, to, value} = element;
+                const decimalPlaces = 18;
                 const txValue = ethers.BigNumber.from(value);
-                if (data === '0x' && parseFloat(txValue.toString()) > 0.01 && exchangeAddresses.indexOf(from) !== -1) {//a9059cbb
-                    //console.log(data)
+                const realvalue = (txValue / Math.pow(10, decimalPlaces)).toFixed(decimalPlaces);
+                if (data === '0x' && parseFloat(realvalue.toString()) > 0.01 && exchangeAddresses.indexOf(from) === -1) {//a9059cbb
+                    //console.log(from)
                     addresses.push(to);
                 }
             });
             
-            const delayBetweenRequests = 2000; // 2 seconds delay
+            const delayBetweenRequests = 210; // 2 seconds delay
             
             for (const address of addresses) {
-                console.log(addresses.length);
+                //console.log(addresses.length);
                 try {
                     const length = await checkContractTransactions(address);
                     if (length <= 1) {

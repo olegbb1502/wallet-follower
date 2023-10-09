@@ -66,9 +66,11 @@ const checkContractSecurity = async (address) => {
         const {result} = await response.json();
         if (result[address.toLowerCase()]) {
             const {lp_holders} = result[address.toLowerCase()];
-            for (let i = 0; i < lp_holders.length; i++) {
-                if (checkForAddress.indexOf(lp_holders[i].address) !== -1) {
-                return true;
+            if (lp_holders && lp_holders.length > 0) {
+                for (let i = 0; i < lp_holders.length; i++) {
+                    if (checkForAddress.indexOf(lp_holders[i].address) !== -1) {
+                    return true;
+                    }
                 }
             }
         }
