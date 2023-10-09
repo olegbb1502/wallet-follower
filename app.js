@@ -277,6 +277,9 @@ const buyTokenHandler = async (hash, from, buyedTokens) => {
             // if (buyTokenHandler?.status === 1) {
             //     await report(address);
             // }
+        } else if (!isdeadAddress) {
+            const message = `${address} skip! No holders or no dead address. Follow to ${from}`;
+            writeToLogFile(message);
         } else {
             const message = `${address} skip! ${buyedTokens.indexOf(address) !== -1 ? 'Was buyed.' : ''}. Follow to ${from}`;
             writeToLogFile(message);
