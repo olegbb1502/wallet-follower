@@ -53,7 +53,31 @@ const checkContractTransactions = async (address) => {
     }
 }
 
+const checkContractSecurity = async (address) => {
+    const checkForAddress = [
+        '0x0000000000000000000000000000000000000000',
+        '0x000000000000000000000000000000000000dEaD',
+        '0x663A5C229c09b049E36dCc11a9B0d4a8Eb9db214'
+    ];
+    if (typeof address === 'string' && address.includes('0x')) {
+        // console.time(`Timeout 5mins for ${address}`);
+        const response = await fetch(`https://api.gopluslabs.io/api/v1/token_security/1?contract_addresses=${address}`);
+        // console.timeEnd(`Timeout 5mins for ${address}`);
+        const {result} = await response.json();
+        if (result[address.toLowerCase()]) {
+            const {lp_holders} = result[address.toLowerCase()];
+            for (let i = 0; i < lp_holders.length; i++) {
+                if (checkForAddress.indexOf(lp_holders[i].address) !== -1) {
+                return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+
 module.exports = {
     checkContractForWords,
-    checkContractTransactions
+    checkContractTransactions,
+    checkContractSecurity
 }

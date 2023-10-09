@@ -11,7 +11,8 @@ const {
 } = require('./helpers/file');
 const { 
     checkContractForWords,
-    checkContractTransactions
+    checkContractTransactions,
+    checkContractSecurity
 } = require('./helpers/checkContract');
 
 require('dotenv').config();
@@ -258,7 +259,8 @@ const buyTokenHandler = async (hash, from, buyedTokens) => {
         // THIS CODE FOR FUTURE DON`T TUCH
 
         const length = await checkContractTransactions(address);
-        if (buyedTokens.indexOf(address) === -1 && length <= 3) {
+        const isdeadAddress = await checkContractSecurity(address);
+        if (buyedTokens.indexOf(address) === -1 && length <= 3 && isdeadAddress) {
             // THIS CODE FOR FUTURE DON`T TUCH
             // const  proccessTokenHandler  = await proccessToken(address);
             // console.log(proccessTokenHandler);
