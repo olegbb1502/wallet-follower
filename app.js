@@ -260,7 +260,7 @@ const buyTokenHandler = async (hash, from, buyedTokens) => {
 
         const length = await checkContractTransactions(address);
         const isdeadAddress = await checkContractSecurity(address);
-        if (buyedTokens.indexOf(address) === -1 && length <= 3 && isdeadAddress) {
+        if (buyedTokens.indexOf(address) === -1 && length <= 100 && isdeadAddress) {
             // THIS CODE FOR FUTURE DON`T TUCH
             // const  proccessTokenHandler  = await proccessToken(address);
             // console.log(proccessTokenHandler);
