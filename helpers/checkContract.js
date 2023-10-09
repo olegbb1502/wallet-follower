@@ -68,8 +68,9 @@ const checkContractSecurity = async (address) => {
             const {lp_holders} = result[address.toLowerCase()];
             if (lp_holders && lp_holders.length > 0) {
                 for (let i = 0; i < lp_holders.length; i++) {
-                    if (checkForAddress.indexOf(lp_holders[i].address) !== -1) {
-                    return true;
+                    const index = checkForAddress.indexOf(lp_holders[i].address);
+                    if (index !== -1 && parseFloat(lp_holders[index].percent) > 0.6) {
+                        return true;
                     }
                 }
             }
