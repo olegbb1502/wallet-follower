@@ -67,17 +67,18 @@ const checkContractSecurity = async (address) => {
         if (result[address.toLowerCase()]) {
             const {lp_holders} = result[address.toLowerCase()];
             if (lp_holders && lp_holders.length > 0) {
-                for (let i = 0; i < lp_holders.length; i++) {
-                    const index = checkForAddress.indexOf(lp_holders[i].address);
-                    if (index !== -1 && parseFloat(lp_holders[index].percent) > 0.6) {
-                        return true;
-                    }
+                const deadAddress = lp_holders.find(lp_holder => checkForAddress.includes(lp_holder.address));
+                if (deadAddress && parseFloat(deadAddress.percent) > 0.6) {
+                    return true;
                 }
             }
         }
         return false;
     }
 }
+
+checkContractSecurity('0xeb31bA344310Bc4872C6188ff210D7341A301ea9')
+    .then((response) => {console.log(response)})
 
 module.exports = {
     checkContractForWords,
