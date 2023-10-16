@@ -11,7 +11,6 @@ const {
 } = require('./helpers/file');
 const { 
     checkContractForWords,
-    checkContractTransactions,
     checkTokenTransactions,
     checkContractSecurity
 } = require('./helpers/checkContract');
@@ -50,143 +49,135 @@ const validEvents = [
     // '0xe8078d94', // addLiquidity
     // '0xe8e33700', // addLiquidity
 ];
-const sniperValidEvents = [
-    // '0xc9567bf9', // openTrading
-    // '0xf305d719', // addLiquidityETH
-    // '0xe8078d94', // addLiquidity
-    // '0xe8e33700', // addLiquidity
-];
-const exchangeAddressesList = fs.readFileSync('./exchangeAddresses.txt', 'utf8');
-const exchangeAddresses = exchangeAddressesList.split('\n');
 
-const abi = [
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "from",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "to",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "value",
-          "type": "uint256"
-        }
-      ],
-      "name": "Transfer",
-      "type": "event"
+// const abi = [
+//     {
+//       "anonymous": false,
+//       "inputs": [
+//         {
+//           "indexed": true,
+//           "internalType": "address",
+//           "name": "from",
+//           "type": "address"
+//         },
+//         {
+//           "indexed": true,
+//           "internalType": "address",
+//           "name": "to",
+//           "type": "address"
+//         },
+//         {
+//           "indexed": false,
+//           "internalType": "uint256",
+//           "name": "value",
+//           "type": "uint256"
+//         }
+//       ],
+//       "name": "Transfer",
+//       "type": "event"
       
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "amountTokenDesired",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "amountTokenMin",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "amountETHMin",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "to",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "deadline",
-                "type": "uint256"
-            }
-        ],
-        "name": "addLiquidityETH",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    // {
-    //     "inputs": [
-    //         {
-    //             "internalType": "address",
-    //             "name": "tokenA",
-    //             "type": "address"
-    //         },
-    //         {
-    //             "internalType": "address",
-    //             "name": "tokenB",
-    //             "type": "address"
-    //         },
-    //         {
-    //             "internalType": "uint256",
-    //             "name": "amountADesired",
-    //             "type": "uint256"
-    //         },
-    //         {
-    //             "internalType": "uint256",
-    //             "name": "amountBDesired",
-    //             "type": "uint256"
-    //         },
-    //         {
-    //             "internalType": "uint256",
-    //             "name": "amountAMin",
-    //             "type": "uint256"
-    //         },
-    //         {
-    //             "internalType": "uint256",
-    //             "name": "amountBMin",
-    //             "type": "uint256"
-    //         },
-    //         {
-    //             "internalType": "address",
-    //             "name": "to",
-    //             "type": "address"
-    //         },
-    //         {
-    //             "internalType": "uint256",
-    //             "name": "deadline",
-    //             "type": "uint256"
-    //         }
-    //     ],
-    //     "name": "addLiquidity",
-    //     "outputs": [],
-    //     "stateMutability": "payable",
-    //     "type": "function"
-    // },
-    // {
-    //     "inputs": [],
-    //     "name": "addLiquidity",
-    //     "outputs": [],
-    //     "stateMutability": "payable",
-    //     "type": "function"
-    // },
-    // {
-    //     "inputs": [],
-    //     "name": "openTrading",
-    //     "outputs": [],
-    //     "stateMutability": "nonpayable",
-    //     "type": "function"
-    // },
-];
+//     },
+//     {
+//         "inputs": [
+//             {
+//                 "internalType": "address",
+//                 "name": "token",
+//                 "type": "address"
+//             },
+//             {
+//                 "internalType": "uint256",
+//                 "name": "amountTokenDesired",
+//                 "type": "uint256"
+//             },
+//             {
+//                 "internalType": "uint256",
+//                 "name": "amountTokenMin",
+//                 "type": "uint256"
+//             },
+//             {
+//                 "internalType": "uint256",
+//                 "name": "amountETHMin",
+//                 "type": "uint256"
+//             },
+//             {
+//                 "internalType": "address",
+//                 "name": "to",
+//                 "type": "address"
+//             },
+//             {
+//                 "internalType": "uint256",
+//                 "name": "deadline",
+//                 "type": "uint256"
+//             }
+//         ],
+//         "name": "addLiquidityETH",
+//         "outputs": [],
+//         "stateMutability": "payable",
+//         "type": "function"
+//     },
+//     // {
+//     //     "inputs": [
+//     //         {
+//     //             "internalType": "address",
+//     //             "name": "tokenA",
+//     //             "type": "address"
+//     //         },
+//     //         {
+//     //             "internalType": "address",
+//     //             "name": "tokenB",
+//     //             "type": "address"
+//     //         },
+//     //         {
+//     //             "internalType": "uint256",
+//     //             "name": "amountADesired",
+//     //             "type": "uint256"
+//     //         },
+//     //         {
+//     //             "internalType": "uint256",
+//     //             "name": "amountBDesired",
+//     //             "type": "uint256"
+//     //         },
+//     //         {
+//     //             "internalType": "uint256",
+//     //             "name": "amountAMin",
+//     //             "type": "uint256"
+//     //         },
+//     //         {
+//     //             "internalType": "uint256",
+//     //             "name": "amountBMin",
+//     //             "type": "uint256"
+//     //         },
+//     //         {
+//     //             "internalType": "address",
+//     //             "name": "to",
+//     //             "type": "address"
+//     //         },
+//     //         {
+//     //             "internalType": "uint256",
+//     //             "name": "deadline",
+//     //             "type": "uint256"
+//     //         }
+//     //     ],
+//     //     "name": "addLiquidity",
+//     //     "outputs": [],
+//     //     "stateMutability": "payable",
+//     //     "type": "function"
+//     // },
+//     // {
+//     //     "inputs": [],
+//     //     "name": "addLiquidity",
+//     //     "outputs": [],
+//     //     "stateMutability": "payable",
+//     //     "type": "function"
+//     // },
+//     // {
+//     //     "inputs": [],
+//     //     "name": "openTrading",
+//     //     "outputs": [],
+//     //     "stateMutability": "nonpayable",
+//     //     "type": "function"
+//     // },
+// ];
 
 
 // Create the ethers.js Interface using the contract ABI
@@ -219,9 +210,6 @@ function writeToLogFile(message, type) {
 const trader = new UniswapTrader();
 const bot = new TelegramBot(TELEGRAM_API);
 
-const walletsList = fs.readFileSync('./addresses.txt', 'utf8');
-const validWallets = walletsList.split('\n');
-
 // FOR TESTING
 // provider.getTransaction('0xcdead78a06d4951b8333bf6119633e83fcccdcbe5dd81d06d2380d0f34dd4332')
 //     .then(res => console.log(JSON.stringify(res)));
@@ -229,52 +217,13 @@ const validWallets = walletsList.split('\n');
 const tokenStorage = [];
 
 provider.on("block", async (blockNumber) => {
-    const todayDate = new Date().toJSON().slice(0, 10);
-    const todayAddressesPath = `./addresses.txt`;
-    if(!fs.existsSync(todayAddressesPath)) {
-        fs.writeFileSync(todayAddressesPath, '', (err) => {
-            console.error(err);
-        });
-    }
-    const todayWalletsList = fs.readFileSync(todayAddressesPath, 'utf8');
-    const todayWallets = todayWalletsList.split('\n');
+    const walletsList = fs.readFileSync('./addresses.txt', 'utf8');
+    const validWallets = walletsList.split('\n').map(wallet => wallet.split('\t')[1]);
     await provider.getBlockWithTransactions(blockNumber).then(async (tx) => {
         if (tx) {
             const blockTokens = [];
             let reviewCounter = 0;
             console.time(`Review for block #: ${blockNumber}`);
-            const addresses = [];
-            tx.transactions.forEach(element => {
-                const { data,hash, from, to, value} = element;
-                const decimalPlaces = 18;
-                const txValue = ethers.BigNumber.from(value);
-                const realvalue = (txValue / Math.pow(10, decimalPlaces)).toFixed(decimalPlaces);
-                if (data === '0x' && parseFloat(realvalue.toString()) > 0.01 && exchangeAddresses.indexOf(from)  !== -1 ) {//a9059cbb
-                    //console.log(to, realvalue )
-                    addresses.push(to);
-                }
-            });
-            
-            const delayBetweenRequests = 210; // 2 seconds delay
-            
-            for (const address of addresses) {
-                //console.log(addresses.length);
-                try {
-                    const length = await checkContractTransactions(address);
-                    // console.log('write exchange address:', address, length);
-                    if (length <= 10) {
-                        // console.log('write exchange address:', address, length);
-                        fs.appendFileSync(todayAddressesPath, address+'\n');
-                    }
-                    await new Promise(resolve => setTimeout(resolve, delayBetweenRequests));
-                } catch (error) {
-                    console.error(`Error fetching data from ${address}:`, error);
-                }
-            
-                // Add a delay before the next fetch
-            }
-
-
             const promises = tx.transactions.map(async (element) => {
                 const { data, from, hash} = element;
                 // const txValue = ethers.BigNumber.from(value);
@@ -289,7 +238,7 @@ provider.on("block", async (blockNumber) => {
                 //         })
                 // }
                 const isValid = validEvents.some(e => data.includes(e))
-                    // && (validWallets.some(w => w === from) || todayWallets.some(w => w === from));
+                    && validWallets.some(w => w === from);
                 const event = data.slice(0, 9);
                 const tokenAddress = data.substring(data.length - 40);
                 const isChecked = blockTokens.indexOf(tokenAddress);
@@ -298,7 +247,6 @@ provider.on("block", async (blockNumber) => {
                     try {
                         const storageUsedTokens = getStorage(storagePath, 'txt');
                         const handler = await buyTokenHandler(hash, from, storageUsedTokens, event);
-                        // console.log('buyTokenHandler');
                         if (handler) {
                             blockTokens.push(tokenAddress);
                             reviewCounter++;
@@ -322,7 +270,7 @@ provider.on("block", async (blockNumber) => {
                 }
                 return false;
             });
-            await new Promise(resolve => setTimeout(resolve, 60*1000));
+            await new Promise(resolve => setTimeout(resolve, 3*60*1000));
             await Promise.all(promises);
             console.timeEnd(`Review for block #: ${blockNumber}`);
             const {heapTotal} = process.memoryUsage();
@@ -410,18 +358,19 @@ const buyTokenHandler = async (hash, from, buyedTokens) => {
                 // if (buyTokenHandler?.status === 1) {
                 //     await report(address);
                 // }
-            } else if (!isdeadAddress) {
+            }
+            if (!isdeadAddress) {
                 console.log('isdeadAddress', isdeadAddress);
                 const message = `${address} skip! Найобщики ліквідності. Follow to ${from}`;
                 writeToLogFile(message);
-            } else if (length > 100) {
-                console.log('length', length);
-                const message = `${address} skip! Стара хуйня. Follow to ${from}`;
-                writeToLogFile(message);
-            } else {
-                const message = `${address} skip! ${buyedTokens.indexOf(address) !== -1 ? 'Куплений уже.' : ''}. Follow to ${from}`;
-                writeToLogFile(message);
             }
+        } else if (length > 100) {
+            console.log('length', length);
+            const message = `${address} skip! Стара хуйня. Follow to ${from}`;
+            writeToLogFile(message);
+        } else {
+            const message = `${address} skip! ${buyedTokens.indexOf(address) !== -1 ? 'Куплений уже.' : ''}. Follow to ${from}`;
+            writeToLogFile(message);
         }
     }
 }

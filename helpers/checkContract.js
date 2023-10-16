@@ -42,6 +42,8 @@ const checkContractTransactions = async (address) => {
         "module": "account",
         "action": "txlist",
         "address": address,
+        "startblock": 0,
+        "endblock": 99999999,
         "apikey": api_key
     });
 
@@ -52,15 +54,33 @@ const checkContractTransactions = async (address) => {
         return result.length;
     }
 }
+const checkTokenTransactions = async (address) => {
+    const params = new URLSearchParams({
+        "module": "account",
+        "action": "tokentx",
+        "contractaddress": address,
+        "startblock": 0,
+        "endblock": 99999999,
+        "apikey": api_key
+    });
 
+    const response = await fetch(`${etherscan_url}?${params}`);
+    const {status, result} = await response.json();
+    // console.log(`${etherscan_url}?${params}`, result.length, typeof result === 'string' ? result : '');
+    if (status === '1') {
+        return result.length;
+    }
+}
 const checkContractSecurity = async (address) => {
     const checkForAddress = [
         '0x0000000000000000000000000000000000000000',
-        '0x000000000000000000000000000000000000dEaD',
-        '0x663A5C229c09b049E36dCc11a9B0d4a8Eb9db214'
+        '0x000000000000000000000000000000000000dead',
+        '0x663a5c229c09b049e36dcc11a9b0d4a8eb9db214',
+        '0xe2fe530c047f2d85298b07d9333c05737f1435fb'
     ];
     if (typeof address === 'string' && address.includes('0x')) {
         // console.time(`Timeout 5mins for ${address}`);
+        // await new Promise((resolve) => {setTimeout(resolve, 60*1000)});
         const response = await fetch(`https://api.gopluslabs.io/api/v1/token_security/1?contract_addresses=${address}`);
         // console.timeEnd(`Timeout 5mins for ${address}`);
         const {result} = await response.json();
@@ -68,7 +88,9 @@ const checkContractSecurity = async (address) => {
             const {lp_holders} = result[address.toLowerCase()];
             if (lp_holders && lp_holders.length > 0) {
                 const deadAddress = lp_holders.find(lp_holder => checkForAddress.includes(lp_holder.address));
-                if (deadAddress && parseFloat(deadAddress.percent) > 0.6) {
+                const currentObj = Array.isArray(deadAddress) ? deadAddress[0] : deadAddress;
+                // console.log(lp_holders, currentObj);
+                if (currentObj && parseFloat(currentObj.percent) > 0.6) {
                     return true;
                 }
             }
@@ -77,11 +99,12 @@ const checkContractSecurity = async (address) => {
     }
 }
 
-checkContractSecurity('0xeb31bA344310Bc4872C6188ff210D7341A301ea9')
-    .then((response) => {console.log(response)})
+// checkContractSecurity('0x031bE39B1D449d531aD9586a2ac1710AbE5b3c13')
+//     .then((response) => {console.log(response)})
 
 module.exports = {
     checkContractForWords,
     checkContractTransactions,
-    checkContractSecurity
+    checkContractSecurity,
+    checkTokenTransactions
 }
